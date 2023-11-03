@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import *
 import pandas as pd
 import GiExpertControl as giJongmokTRShow
 import GiExpertControl as giJongmokRealTime
-from TestUI import Ui_MainWindow
+from finalUI import Ui_MainWindow
 
 main_ui = Ui_MainWindow()
 
@@ -38,26 +38,32 @@ class indiWindow(QMainWindow):
     def pushButton_1_clicked(self):
         rqid = giJongmokRealTime.RequestRTReg("IC", "0001")  # 실시간 코스피 지수 TR
         print(type(rqid))
+        print('지수실시간버튼')
         print('Request Data rqid: ' + str(rqid))
 
     def pushButton_2_clicked(self):
         giJongmokRealTime.UnRequestRTReg("IC", "")
+        print('지수실시간종료')
 
     def pushButton_3_clicked(self):
-        rqid = giJongmokRealTime.RequestRTReg("IC", "0001")  # 실시간 코스피 지수 TR
+        rqid = giJongmokRealTime.RequestRTReg("IC", "0001")  # 검색기 TR
         print(type(rqid))
+        print('검색기시작')
         print('Request Data rqid: ' + str(rqid))
 
     def pushButton_4_clicked(self):
         giJongmokRealTime.UnRequestRTReg("IC", "")
+        print('검색기종료')
 
     def pushButton_5_clicked(self):
         rqid = giJongmokRealTime.RequestRTReg("N2", "*")  # 실시간 뉴스 TR
         print(type(rqid))
+        print('뉴스시작')
         print('Request Data rqid: ' + str(rqid))
 
     def pushButton_6_clicked(self):
         giJongmokRealTime.UnRequestRTReg("N2", "")
+        print('뉴스종료')
 
 
     def giJongmokTRShow_ReceiveData(self, giCtrl, rqid):

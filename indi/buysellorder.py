@@ -42,7 +42,7 @@ class IndiWindow(QMainWindow):
     # 버튼을 누르면 조회함수를 호출하도록 합니다.
     def btn_Search(self):
         # 본인의 계좌정보와 원하는 종목코드, 주문유형 등을 입력해주세요!!
-        self.order(27051806068, 0000, 'A005930', 70000, 1, 2, 1)
+        self.order(27051806068, 0000, '005930', 70000, '1', 2, 1)
 
 
     # 주식을 주문합니다.    
@@ -62,13 +62,14 @@ class IndiWindow(QMainWindow):
         ret = self.IndiTR.dynamicCall("SetSingleData(int, QString)", 7, str(order_type))  # 매수매도 구분
         ret = self.IndiTR.dynamicCall("SetSingleData(int, QString)", 8, 'A' + str(code))  # 종목코드
         ret = self.IndiTR.dynamicCall("SetSingleData(int, QString)", 9, str(count))  # 주문수량
-        #ret = self.IndiTR.dynamicCall("SetSingleData(int, QString)", 10, str(price))  # 주문가격
+        ret = self.IndiTR.dynamicCall("SetSingleData(int, QString)", 10, str(price))  # 주문가격
         ret = self.IndiTR.dynamicCall("SetSingleData(int, QString)", 11, '1')  # 정규장
         ret = self.IndiTR.dynamicCall("SetSingleData(int, QString)", 12, call_type)  # 호가유형, 1: 시장가, X:최유리, Y:최우선
         ret = self.IndiTR.dynamicCall("SetSingleData(int, QString)", 13, '0')  # 주문조건, 0:일반, 3:IOC, 4:FOK
         ret = self.IndiTR.dynamicCall("SetSingleData(int, QString)", 14, '0')  # 신용대출
         ret = self.IndiTR.dynamicCall("SetSingleData(int, QString)", 21, 'Y')  # 결과 출력 여부
-        rqid = self.IndiTR.dynamicCall("RequestData()")  # 데이터 요청
+        rqid = self.IndiTR.RequestData()
+        # rqid = self.IndiTR.dynamicCall("RequestData()")  # 데이터 요청
 
         # 요청한 ID를 저장합니다.
         self.rqidD[rqid] = "SABA101U1"

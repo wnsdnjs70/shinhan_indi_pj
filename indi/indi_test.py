@@ -7,6 +7,7 @@ import pandas as pd
 import GiExpertControl as giLogin # 통신 모듈 로그인할거
 import GiExpertControl as giJongmokTRShow # GiExpertControl은 우리가 파일 넣어줬던거 GiExpertControl.py 이거
 import GiExpertControl as giJongmokRealTime # 
+import GiExpertControl as buy
 from TestUI import Ui_MainWindow
 
 main_ui = Ui_MainWindow()
@@ -20,6 +21,7 @@ class indiWindow(QMainWindow): #
         giJongmokTRShow.RunIndiPython()
         giLogin.RunIndiPython()
         giJongmokRealTime.RunIndiPython()
+        buy.RunIndiPython()
         self.rqidD = {}
         main_ui.setupUi(self)      
 
@@ -28,6 +30,7 @@ class indiWindow(QMainWindow): #
         main_ui.pushButton_3.clicked.connect(self.pushButton_3_clicked)
         giJongmokTRShow.SetCallBack('ReceiveData', self.giJongmokTRShow_ReceiveData) # 단일조회
         giJongmokRealTime.SetCallBack('ReceiveRTData', self.giJongmokRealTime_ReceiveRTData) # 실시간조회
+        buy.SetCallBack('ReceiveRTData', self.buy_ReceiveRTData) # 매수
         
         # print(giLogin.GetCommState())
         # if giLogin.GetCommState() == 0: # 정상
@@ -94,7 +97,10 @@ class indiWindow(QMainWindow): #
             
     def pushButton_3_clicked(self): # 시세 등록 끄는거.
         giJongmokRealTime.UnRequestRTReg("SC", "")
-        
+    
+    def buy_ReceiveRTData(self):
+        SetSingleData
+
 if __name__ == "__main__": # 1. 맨처음 메인 탄다.
     app = QApplication(sys.argv)
     IndiWindow = indiWindow()    

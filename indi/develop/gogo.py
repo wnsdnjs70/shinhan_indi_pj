@@ -7,6 +7,7 @@ import pandas as pd
 import GiExpertControl as giJongmokTRShow
 import GiExpertControl as giJongmokRealTime
 from finalUI import Ui_MainWindow
+from datetime import datetime
 
 main_ui = Ui_MainWindow()
 
@@ -30,7 +31,6 @@ class indiWindow(QMainWindow):
         main_ui.pushButton_4.clicked.connect(self.pushButton_4_clicked) # 검색기 종료
 
         main_ui.pushButton_5.clicked.connect(self.pushButton_5_clicked) # 뉴스 종료
-        main_ui.pushButton_6.clicked.connect(self.pushButton_6_clicked) # 뉴스 종료
 
         giJongmokTRShow.SetCallBack('ReceiveData', self.giJongmokTRShow_ReceiveData)
         giJongmokRealTime.SetCallBack('ReceiveRTData', self.giJongmokRealTime_ReceiveRTData)
@@ -56,62 +56,65 @@ class indiWindow(QMainWindow):
         print('검색기종료')
 
     def pushButton_5_clicked(self):
-        rqid = giJongmokRealTime.RequestRTReg("N2", "*")  # 실시간 뉴스 TR
+        # rqid = giJongmokRealTime.RequestRTReg("N0", "*")  # 실시간 뉴스 TR
+        TR_Name = "TR_3100_D"   
+        ret = giJongmokTRShow.SetQueryName(TR_Name)
+        # 현재 날짜를 가져오기
+        today = datetime.now()
+        formatted_date = today.strftime("%Y%m%d")
+        print(formatted_date)
+        ret = giJongmokTRShow.SetSingleData(0,"055550")
+        ret = giJongmokTRShow.SetSingleData(1,"1")
+        ret = giJongmokTRShow.SetSingleData(2, formatted_date)
+        rqid = giJongmokTRShow.RequestData() # 요청
         print(type(rqid))
         print('뉴스시작')
         print('Request Data rqid: ' + str(rqid))
+        self.rqidD[rqid] = TR_Name
 
-    def pushButton_6_clicked(self):
-        giJongmokRealTime.UnRequestRTReg("N2", "")
-        print('뉴스종료')
+    def pushButton_6_clicked(self): # 매수
+        giJongmokRealTime.UnRequestRTReg("IC", "")
+        print('검색기종료')
+
+    def pushButton_7_clicked(self): # 매도
+        giJongmokRealTime.UnRequestRTReg("IC", "")
+        print('검색기종료')       
+
+
 
 
     def giJongmokTRShow_ReceiveData(self, giCtrl, rqid):
         print("in receive_Data:", rqid)
         print('recv rqid: {}->{}\n'.format(rqid, self.rqidD[rqid]))
         TR_Name = self.rqidD[rqid]
-        tr_data_output = []
+        
+        print("inin")
         output = []
+        tr_data_output = []
 
-        print("TR_name : ", TR_Name)
-        if TR_Name == "SABA101U1":
+        print(TR_Name)
+
+        if TR_Name == "TR_3100_D": # 뉴스
             nCnt = giCtrl.GetMultiRowCount()
-            print("c")
+            main_ui.tableWidget_3.setRowCount(nCnt)
             for i in range(0, nCnt):
-                tr_data_output.append([])
-                main_ui.tableWidget.setItem(i,0,QTableWidgetItem(str(giCtrl.GetMultiData(i, 0))))
-                main_ui.tableWidget.setItem(i,1,QTableWidgetItem(str(giCtrl.GetMultiData(i, 1))))
-                main_ui.tableWidget.setItem(i,2,QTableWidgetItem(str(giCtrl.GetMultiData(i, 2))))
-                main_ui.tableWidget.setItem(i,3,QTableWidgetItem(str(giCtrl.GetMultiData(i, 5))))
-                main_ui.tableWidget.setItem(i,4,QTableWidgetItem(str(giCtrl.GetMultiData(i, 6))))
-                for j in range(0,5):
-                    tr_data_output[i].append(giCtrl.GetMultiData(i, j))
-            print(type(tr_data_output))
+                main_ui.tableWidget_3.setItem(i,0,QTableWidgetItem(str(giCtrl.GetMultiData(i, 0))))
+                main_ui.tableWidget_3.setItem(i,1,QTableWidgetItem(str(giCtrl.GetMultiData(i, 2))))
 
     def giJongmokRealTime_ReceiveRTData(self, giCtrl, RealType):
         if RealType == "IC":
-            main_ui.tableWidget_1.insertRow(main_ui.tableWidget_1.rowCount())
-            final_rowCount = main_ui.tableWidget_2.rowCount() - 1
-            main_ui.tableWidget_1.setItem(final_rowCount, 0, QTableWidgetItem(str(giCtrl.GetSingleData(0))))  # 업종코드
-            main_ui.tableWidget_1.setItem(final_rowCount, 1, QTableWidgetItem(str(giCtrl.GetSingleData(2))))  # 장구분
-            main_ui.tableWidget_1.setItem(final_rowCount, 2, QTableWidgetItem(str(giCtrl.GetSingleData(3))))  # 현재지수
-            main_ui.tableWidget_1.setItem(final_rowCount, 3, QTableWidgetItem(str(giCtrl.GetSingleData(6))))  # 전일대비율
-            main_ui.tableWidget_1.setItem(final_rowCount, 4, QTableWidgetItem(str(giCtrl.GetSingleData(8))))  # 누적거래대금
-        if RealType == "N2":
-            main_ui.tableWidget_3.insertRow(main_ui.tableWidget_3.rowCount())
-            final_rowCount = main_ui.tableWidget_2.rowCount() - 1
-            main_ui.tableWidget_3.setItem(final_rowCount, 0, QTableWidgetItem(str(giCtrl.GetSingleData(0)))) # 뉴스구분
-            main_ui.tableWidget_3.setItem(final_rowCount, 1, QTableWidgetItem(str(giCtrl.GetSingleData(1)))) # 뉴스일자
-            main_ui.tableWidget_3.setItem(final_rowCount, 2, QTableWidgetItem(str(giCtrl.GetSingleData(2)))) # 뉴스기사번호
-            main_ui.tableWidget_3.setItem(final_rowCount, 3, QTableWidgetItem(str(giCtrl.GetSingleData(5)))) # 뉴스 제목
-
-
-
+            if main_ui.tableWidget_1.rowCount() == 0:
+                main_ui.tableWidget_1.insertRow(main_ui.tableWidget_1.rowCount())
+            main_ui.tableWidget_1.setItem(0, 0, QTableWidgetItem(str(giCtrl.GetSingleData(0))))  # 업종코드
+            main_ui.tableWidget_1.setItem(0, 1, QTableWidgetItem(str(giCtrl.GetSingleData(2))))  # 장구분
+            main_ui.tableWidget_1.setItem(0, 2, QTableWidgetItem(str(giCtrl.GetSingleData(3))))  # 현재지수
+            main_ui.tableWidget_1.setItem(0, 3, QTableWidgetItem(str(giCtrl.GetSingleData(6))))  # 전일대비율
+            main_ui.tableWidget_1.setItem(0, 4, QTableWidgetItem(str(giCtrl.GetSingleData(8))))  # 누적거래대금
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     IndiWindow = indiWindow()
-    # IndiWindow.show()
+    IndiWindow.show()
     app.exec_()
 
     # if IndiWindow.MainSymbol != "":

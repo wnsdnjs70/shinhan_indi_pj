@@ -6,7 +6,7 @@ class Telegram():
         self.bot = telepot.Bot(token=my_token)
 
     def sendMessage(self, message):
-        self.bot.sendMessage("-1002139570965", message, parse_mode="Markdown")
+        self.bot.sendMessage("-1002139570965", message)
 
     def getUpdates(self):
         return self.bot.getUpdates()

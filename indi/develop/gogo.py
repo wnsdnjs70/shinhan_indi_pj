@@ -24,7 +24,7 @@ class indiWindow(QMainWindow):
         self.rqidD = {}
         self.stock_dict = {}
         main_ui.setupUi(self)
-
+        telegram.sendMessage("인디 시작")
 
         main_ui.pushButton_1.clicked.connect(self.pushButton_1_clicked) # 지수 시작
         main_ui.pushButton_2.clicked.connect(self.pushButton_2_clicked) # 지수 종료
@@ -37,7 +37,7 @@ class indiWindow(QMainWindow):
         main_ui.pushButton_6.clicked.connect(self.pushButton_6_clicked) # 매수
         main_ui.pushButton_7.clicked.connect(self.pushButton_7_clicked) # 매도
 
-        main_ui.pushButton_8.clicked.connect(self.pushButton_7_clicked) # 잔고조회
+        main_ui.pushButton_8.clicked.connect(self.pushButton_8_clicked) # 잔고조회
 
         giJongmokTRShow.SetCallBack('ReceiveData', self.giJongmokTRShow_ReceiveData)
         giJongmokRealTime.SetCallBack('ReceiveRTData', self.giJongmokRealTime_ReceiveRTData)
@@ -210,7 +210,7 @@ class indiWindow(QMainWindow):
                 main_ui.tableWidget_3.setItem(i,0,QTableWidgetItem(str(giCtrl.GetMultiData(i, 0))))
                 main_ui.tableWidget_3.setItem(i,1,QTableWidgetItem(str(giCtrl.GetMultiData(i, 2))))
 
-        if TR_Name == "SABA101U1": # 매수
+        if TR_Name == "SABA101U1": # 매수/매도
             print((str(giCtrl.GetSingleData(0))))
             print((str(giCtrl.GetSingleData(1))))
             print((str(giCtrl.GetSingleData(2))))
@@ -222,14 +222,16 @@ class indiWindow(QMainWindow):
             nCnt = giCtrl.GetMultiRowCount()
             main_ui.tableWidget_4.setRowCount(nCnt)
             for i in range(0, nCnt):
-                main_ui.tableWidget.setItem(i,0,QTableWidgetItem(str(giCtrl.GetMultiData(i, 0))))
-                main_ui.tableWidget.setItem(i,1,QTableWidgetItem(str(giCtrl.GetMultiData(i, 1))))
-                main_ui.tableWidget.setItem(i,2,QTableWidgetItem(str(giCtrl.GetMultiData(i, 2))))
-                main_ui.tableWidget.setItem(i,3,QTableWidgetItem(str(giCtrl.GetMultiData(i, 5))))
-                main_ui.tableWidget.setItem(i,4,QTableWidgetItem(str(giCtrl.GetMultiData(i, 6))))
+                main_ui.tableWidget_4.setItem(i,0,QTableWidgetItem(str(giCtrl.GetMultiData(i, 0))))
+                main_ui.tableWidget_4.setItem(i,1,QTableWidgetItem(str(giCtrl.GetMultiData(i, 1))))
+                main_ui.tableWidget_4.setItem(i,2,QTableWidgetItem(str(giCtrl.GetMultiData(i, 2)).lstrip('0')))
+                main_ui.tableWidget_4.setItem(i,3,QTableWidgetItem(str(giCtrl.GetMultiData(i, 5)).lstrip('0')))
+                main_ui.tableWidget_4.setItem(i,4,QTableWidgetItem(str(giCtrl.GetMultiData(i, 6)).lstrip('0')))
 
         if TR_Name == "TR_1864": # 거래량 급등락 종목 조회
             nCnt = giCtrl.GetMultiRowCount()
+            print("거래량 급등종목")
+            print(nCnt)
             main_ui.tableWidget_4.setRowCount(nCnt)
             for i in range(0, nCnt):
                 jongmokCode = giCtrl.GetSingleData(1) # 단축코드
@@ -240,9 +242,11 @@ class indiWindow(QMainWindow):
                 volumePower = giCtrl.GetSingleData(13) # 체결강도
                 self.stock_dict[jongmokCode] = Stock(jongmokCode, name, price, riseRate, volume, volumePower) # map에 추가
 
-        if TR_Name == "TR_1864": # 신고가/ 신저가
+        if TR_Name == "TR_1505_03": # 신고가/ 신저가
             nCnt = giCtrl.GetMultiRowCount()
             main_ui.tableWidget_4.setRowCount(nCnt)
+            print("신고가")
+            print(nCnt)
             stock_messages = []
             for i in range(0, nCnt):
                 jongmokCode = giCtrl.GetSingleData(0) # 단축코드
@@ -262,6 +266,8 @@ class indiWindow(QMainWindow):
             if stock_messages:
                 combined_message = "\n".join(stock_messages)
                 telegram.sendMessage(combined_message)
+                
+        telegram.sendMessage(TR_Name)
 
     def giJongmokRealTime_ReceiveRTData(self, giCtrl, RealType):
         if RealType == "IC":

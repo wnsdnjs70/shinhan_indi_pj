@@ -106,10 +106,10 @@ class indiWindow(QMainWindow):
 
     def pushButton_6_clicked(self): # 매수
         gaejwa_text = main_ui.textEdit_1.toPlainText()
-        PW_text = main_ui.textEdit_2.toPlainText();
-        jongmokCode = main_ui.textEdit_3.toPlainText();
-        orderPrice = main_ui.textEdit_4.toPlainText();
-        quantity = main_ui.spinBox.value();
+        PW_text = main_ui.textEdit_2.toPlainText()
+        jongmokCode = main_ui.textEdit_3.toPlainText()
+        orderPrice = main_ui.textEdit_4.toPlainText()
+        quantity = main_ui.spinBox.value()
 
         TR_Name = "SABA101U1"
         ret = giJongmokTRShow.SetQueryName(TR_Name)
@@ -144,10 +144,10 @@ class indiWindow(QMainWindow):
 
     def pushButton_7_clicked(self): # 매도
         gaejwa_text = main_ui.textEdit_1.toPlainText()
-        PW_text = main_ui.textEdit_2.toPlainText();
-        jongmokCode = main_ui.textEdit_3.toPlainText();
-        orderPrice = main_ui.textEdit_4.toPlainText();
-        quantity = main_ui.spinBox.value();
+        PW_text = main_ui.textEdit_2.toPlainText()
+        jongmokCode = main_ui.textEdit_3.toPlainText()
+        orderPrice = main_ui.textEdit_4.toPlainText()
+        quantity = main_ui.spinBox.value()
         TR_Name = "SABA101U1"
 
         ret = giJongmokTRShow.SetQueryName(TR_Name)
@@ -182,7 +182,7 @@ class indiWindow(QMainWindow):
 
     def pushButton_8_clicked(self): # 계좌 조회
         gaejwa_text = main_ui.textEdit_1.toPlainText()
-        PW_text = main_ui.textEdit_2.toPlainText();
+        PW_text = main_ui.textEdit_2.toPlainText()
         TR_Name = "SABA200QB"
 
         ret = giJongmokTRShow.SetQueryName(TR_Name)

@@ -9,6 +9,7 @@ import GiExpertControl as giJongmokRealTime
 from finalUI import Ui_MainWindow
 from datetime import datetime
 from telegram import Telegram
+import time
 
 main_ui = Ui_MainWindow()
 telegram = Telegram()
@@ -42,6 +43,8 @@ class indiWindow(QMainWindow):
         giJongmokTRShow.SetCallBack('ReceiveData', self.giJongmokTRShow_ReceiveData)
         giJongmokRealTime.SetCallBack('ReceiveRTData', self.giJongmokRealTime_ReceiveRTData)
 
+
+
     def pushButton_1_clicked(self): # 지수 실시간
         rqid = giJongmokRealTime.RequestRTReg("IC", "0001")  # 실시간 코스피 지수 TR
         print(type(rqid))
@@ -53,35 +56,9 @@ class indiWindow(QMainWindow):
         print('지수실시간종료')
 
     def pushButton_3_clicked(self): # 검색기 시작
-
-        TR_Name = "TR_1864" # TR_1864 거래량 금등락 종목 조회
-        ret = giJongmokTRShow.SetQueryName(TR_Name)
-        ret = giJongmokTRShow.SetSingleData(0, "2")  # 장구분자 (전체)
-        ret = giJongmokTRShow.SetSingleData(1, "1")  # 대비급등락구분(5일평균대비 급증)
-        ret = giJongmokTRShow.SetSingleData(2, "2")  # 대비율 ( 100% 이상)
-        ret = giJongmokTRShow.SetSingleData(3, "1") # 거래량 조건
-        ret = giJongmokTRShow.SetSingleData(4, "1") # 종목조건 (전체조회)
-        ret = giJongmokTRShow.SetSingleData(5, "500") # 시가총액조건 (500억)
-        rqid = giJongmokTRShow.RequestData()
-        print(giJongmokTRShow.GetErrorCode())
-        print(giJongmokTRShow.GetErrorMessage())
-        print(type(rqid))
-        print('Request Data rqid: ' + str(rqid))
-        self.rqidD[rqid] = TR_Name
-
-        TR_Name = "TR_1505_03"  # TR_1505_03 신고가/ 신저가
-        ret = giJongmokTRShow.SetQueryName(TR_Name)
-        ret = giJongmokTRShow.SetSingleData(0, "2")  # 장구분자 (전체)
-        ret = giJongmokTRShow.SetSingleData(1, "2")  # 종류(52주 신고가)
-        ret = giJongmokTRShow.SetSingleData(2, "1")  # 거래량 조건
-        ret = giJongmokTRShow.SetSingleData(3, "1")  # 종목조건 (전체조회)
-        ret = giJongmokTRShow.SetSingleData(4, "500") # 시가총액조건 (500억)
-        rqid = giJongmokTRShow.RequestData()
-        print(giJongmokTRShow.GetErrorCode())
-        print(giJongmokTRShow.GetErrorMessage())
-        print(type(rqid))
-        print('Request Data rqid: ' + str(rqid))
-        self.rqidD[rqid] = TR_Name
+        self.TR_1864()
+        time.sleep(2)
+        self.TR_1505_03()
 
     def pushButton_4_clicked(self): #검색기 종료
         giJongmokRealTime.UnRequestRTReg("IC", "")
@@ -211,12 +188,13 @@ class indiWindow(QMainWindow):
                 main_ui.tableWidget_3.setItem(i,1,QTableWidgetItem(str(giCtrl.GetMultiData(i, 2))))
 
         if TR_Name == "SABA101U1": # 매수/매도
-            print((str(giCtrl.GetSingleData(0))))
-            print((str(giCtrl.GetSingleData(1))))
-            print((str(giCtrl.GetSingleData(2))))
-            print((str(giCtrl.GetSingleData(3))))
-            print((str(giCtrl.GetSingleData(4))))
-            print((str(giCtrl.GetSingleData(5))))
+            print("매수매도 값")
+            # print((str(giCtrl.GetSingleData(0))))
+            # print((str(giCtrl.GetSingleData(1))))
+            # print((str(giCtrl.GetSingleData(2))))
+            # print((str(giCtrl.GetSingleData(3))))
+            # print((str(giCtrl.GetSingleData(4))))
+            # print((str(giCtrl.GetSingleData(5))))
 
         if TR_Name == "SABA200QB": # 계좌 조회
             nCnt = giCtrl.GetMultiRowCount()
@@ -232,37 +210,65 @@ class indiWindow(QMainWindow):
             nCnt = giCtrl.GetMultiRowCount()
             print("거래량 급등종목")
             print(nCnt)
-            main_ui.tableWidget_4.setRowCount(nCnt)
+            main_ui.tableWidget_2.setRowCount(nCnt)
             for i in range(0, nCnt):
-                jongmokCode = giCtrl.GetSingleData(1) # 단축코드
-                name = giCtrl.GetSingleData(2) # 한글종목명
-                price = giCtrl.GetSingleData(3) # 현재가
-                riseRate = giCtrl.GetSingleData(6) # 전일대비율
-                volume = giCtrl.GetSingleData(7) # 누적거래량
-                volumePower = giCtrl.GetSingleData(13) # 체결강도
+                jongmokCode = giCtrl.GetMultiData(i,1) # 단축코드
+                name = giCtrl.GetMultiData(i,2) # 한글종목명
+                price = giCtrl.GetMultiData(i,3) # 현재가
+                riseRate = giCtrl.GetMultiData(i,6) # 전일대비율
+                volume = giCtrl.GetMultiData(i,7) # 누적거래량
+                volumePower = giCtrl.GetMultiData(i,13) # 체결강도
+                print(jongmokCode)
+                # print(name)
+                # print(price)
+                # print(riseRate)
+                # print(volume)
+                # print(volumePower)
                 self.stock_dict[jongmokCode] = Stock(jongmokCode, name, price, riseRate, volume, volumePower) # map에 추가
+            print("거래량급등락에서 조회한 dict len:")
+            print(len(self.stock_dict))
 
         if TR_Name == "TR_1505_03": # 신고가/ 신저가
             nCnt = giCtrl.GetMultiRowCount()
-            main_ui.tableWidget_4.setRowCount(nCnt)
+            main_ui.tableWidget_2.setRowCount(nCnt)
             print("신고가")
             print(nCnt)
+            
             stock_messages = []
             for i in range(0, nCnt):
-                jongmokCode = giCtrl.GetSingleData(0) # 단축코드
-                if (jongmokCode in self.stock_dict):
+                jongmokCode = giCtrl.GetMultiData(i,0) # 단축코드
+                # print("신고가 종목코드:")
+                # print(giCtrl.GetMultiData(i,0))
+                # print(giCtrl.GetMultiData(i,1))
+                # print(giCtrl.GetMultiData(i,2))
+                # print(giCtrl.GetMultiData(i,3))
+                idx = 0
+                
+                
+                if self.stock_dict[jongmokCode] is not None:
+                    print("if문입니다!!@!@!@!@")
                     main_ui.tableWidget_2.insertRow(main_ui.tableWidget_2.rowCount())
-                    final_rowCount = main_ui.tableWidget_2.rowCount() - 1
+                    # final_rowCount = main_ui.tableWidget_2.rowCount() - 1
                     found_stock = self.stock_dict[jongmokCode]
-                    main_ui.tableWidget_2.setItem(final_rowCount, 0, QTableWidgetItem(str(jongmokCode)))
-                    main_ui.tableWidget_2.setItem(final_rowCount, 1, QTableWidgetItem(str(found_stock.name)))
-                    main_ui.tableWidget_2.setItem(final_rowCount, 2, QTableWidgetItem(str(found_stock.price)))
-                    main_ui.tableWidget_2.setItem(final_rowCount, 3, QTableWidgetItem(str(found_stock.riseRate)))
-                    main_ui.tableWidget_2.setItem(final_rowCount, 4, QTableWidgetItem(str(found_stock.volume)))
-                    main_ui.tableWidget_2.setItem(final_rowCount, 5, QTableWidgetItem(str(found_stock.volumePower)))
+                    print(jongmokCode)
+                    print(found_stock.name)
+                    print(found_stock.price)
+                    print(found_stock.riseRate)
+                    print(found_stock.volume)
+                    print(found_stock.volumePower)
+
+                    main_ui.tableWidget_2.setItem(idx, 0, QTableWidgetItem(str(jongmokCode)))
+                    main_ui.tableWidget_2.setItem(idx, 1, QTableWidgetItem(str(found_stock.name)))
+                    main_ui.tableWidget_2.setItem(idx, 2, QTableWidgetItem(str(found_stock.price)))
+                    main_ui.tableWidget_2.setItem(idx, 3, QTableWidgetItem(str(found_stock.riseRate)))
+                    main_ui.tableWidget_2.setItem(idx, 4, QTableWidgetItem(str(found_stock.volume)))
+                    main_ui.tableWidget_2.setItem(idx, 5, QTableWidgetItem(str(found_stock.volumePower)))
 
                     message = found_stock.create_stock_message()
                     stock_messages.append(message)
+                    idx = idx + 1
+            print("신고가에서 확인한 dict사이즈입니다.")
+            print(len(self.stock_dict))
             if stock_messages:
                 combined_message = "\n".join(stock_messages)
                 telegram.sendMessage(combined_message)
@@ -278,6 +284,37 @@ class indiWindow(QMainWindow):
             main_ui.tableWidget_1.setItem(0, 2, QTableWidgetItem(str(giCtrl.GetSingleData(3))))  # 현재지수
             main_ui.tableWidget_1.setItem(0, 3, QTableWidgetItem(str(giCtrl.GetSingleData(6))))  # 전일대비율
             main_ui.tableWidget_1.setItem(0, 4, QTableWidgetItem(str(giCtrl.GetSingleData(8))))  # 누적거래대금
+
+    def TR_1864(self):
+        TR_Name = "TR_1864" # TR_1864 거래량 금등락 종목 조회
+        ret = giJongmokTRShow.SetQueryName(TR_Name)
+        ret = giJongmokTRShow.SetSingleData(0, "2")  # 장구분자 (전체)
+        ret = giJongmokTRShow.SetSingleData(1, "1")  # 대비급등락구분(5일평균대비 급증)
+        ret = giJongmokTRShow.SetSingleData(2, "2")  # 대비율 ( 100% 이상)
+        ret = giJongmokTRShow.SetSingleData(3, "1") # 거래량 조건
+        ret = giJongmokTRShow.SetSingleData(4, "1") # 종목조건 (전체조회)
+        ret = giJongmokTRShow.SetSingleData(5, "500") # 시가총액조건 (500억)
+        rqid = giJongmokTRShow.RequestData()
+        print(giJongmokTRShow.GetErrorCode())
+        print(giJongmokTRShow.GetErrorMessage())
+        print(type(rqid))
+        print('Request Data rqid: ' + str(rqid))
+        self.rqidD[rqid] = TR_Name
+    
+    def TR_1505_03(self):
+        TR_Name = "TR_1505_03"  # TR_1505_03 신고가/ 신저가
+        ret = giJongmokTRShow.SetQueryName(TR_Name)
+        ret = giJongmokTRShow.SetSingleData(0, "2")  # 장구분자 (전체)
+        ret = giJongmokTRShow.SetSingleData(1, "2")  # 종류(52주 신고가)
+        ret = giJongmokTRShow.SetSingleData(2, "1")  # 거래량 조건
+        ret = giJongmokTRShow.SetSingleData(3, "1")  # 종목조건 (전체조회)
+        ret = giJongmokTRShow.SetSingleData(4, "500") # 시가총액조건 (500억)
+        rqid = giJongmokTRShow.RequestData()
+        print(giJongmokTRShow.GetErrorCode())
+        print(giJongmokTRShow.GetErrorMessage())
+        print(type(rqid))
+        print('Request Data rqid: ' + str(rqid))
+        self.rqidD[rqid] = TR_Name
 
 class Stock:
     def __init__(self, jongmokCode, name, price, riseRate, volume, volumePower):
@@ -296,6 +333,8 @@ class Stock:
 
         message = f"{name} 현재 {price:.2f}등락 중 {riseRate}% 체결강도: {volumePower}"
         return message
+
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

@@ -100,7 +100,7 @@ class Ui_MainWindow(object):
         self.tableWidget_4 = QtWidgets.QTableWidget(self.centralwidget)
         self.tableWidget_4.setGeometry(QtCore.QRect(30, 480, 611, 181))
         self.tableWidget_4.setObjectName("tableWidget_4")
-        self.tableWidget_4.setColumnCount(5)
+        self.tableWidget_4.setColumnCount(7)
         self.tableWidget_4.setRowCount(0)
         item = QtWidgets.QTableWidgetItem()
         self.tableWidget_4.setHorizontalHeaderItem(0, item)
@@ -112,6 +112,10 @@ class Ui_MainWindow(object):
         self.tableWidget_4.setHorizontalHeaderItem(3, item)
         item = QtWidgets.QTableWidgetItem()
         self.tableWidget_4.setHorizontalHeaderItem(4, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget_4.setHorizontalHeaderItem(5, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget_4.setHorizontalHeaderItem(6, item)
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
@@ -184,6 +188,10 @@ class Ui_MainWindow(object):
         item.setText(_translate("MainWindow", "현재가"))
         item = self.tableWidget_4.horizontalHeaderItem(4)
         item.setText(_translate("MainWindow", "평균단가"))
+        item = self.tableWidget_4.horizontalHeaderItem(5)
+        item.setText(_translate("MainWindow", "매수미체결수량"))
+        item = self.tableWidget_4.horizontalHeaderItem(6)
+        item.setText(_translate("MainWindow", "매도미체결수량"))
 
 
 if __name__ == "__main__":

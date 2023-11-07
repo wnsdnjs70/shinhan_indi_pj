@@ -325,6 +325,16 @@ p, li { white-space: pre-wrap; }
       <string>평균단가</string>
      </property>
     </column>
+    <column>
+     <property name="text">
+      <string>매수미체결수량</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>매도미체결수량</string>
+     </property>
+    </column>
    </widget>
   </widget>
  </widget>

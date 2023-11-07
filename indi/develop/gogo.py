@@ -24,6 +24,7 @@ class indiWindow(QMainWindow):
         giJongmokRealTime.RunIndiPython()
         self.rqidD = {}
         self.stock_dict = {}
+        self.searchFlag = True
         main_ui.setupUi(self)
         telegram.sendMessage("인디 시작")
 
@@ -54,6 +55,8 @@ class indiWindow(QMainWindow):
         print('지수실시간종료')
 
     def pushButton_3_clicked(self): # 검색기 시작
+        self.searchFlag = True
+        
         TR_Name = "TR_1864" # TR_1864 거래량 금등락 종목 조회
         ret = giJongmokTRShow.SetQueryName(TR_Name)
         ret = giJongmokTRShow.SetSingleData(0, "2")  # 장구분자 (전체)
@@ -68,7 +71,7 @@ class indiWindow(QMainWindow):
         print(type(rqid))
         print('Request Data rqid: ' + str(rqid))
         self.rqidD[rqid] = TR_Name
-
+        
         TR_Name = "TR_1505_03"  # TR_1505_03 신고가/ 신저가
         ret = giJongmokTRShow.SetQueryName(TR_Name)
         ret = giJongmokTRShow.SetSingleData(0, "2")  # 장구분자 (전체)
@@ -84,11 +87,13 @@ class indiWindow(QMainWindow):
         self.rqidD[rqid] = TR_Name
 
     def pushButton_4_clicked(self): #검색기 종료
-        giJongmokRealTime.UnRequestRTReg("IC", "")
+        # giJongmokRealTime.UnRequestRTReg("IC", "")
+        self.searchFlag = False
         print('검색기종료')
 
     def pushButton_5_clicked(self): # 뉴스 불러오기
         TR_Name = "TR_3100_D"   
+        print('뉴스시작')
         ret = giJongmokTRShow.SetQueryName(TR_Name)
         # 현재 날짜를 가져오기
         today = datetime.now()
@@ -100,13 +105,20 @@ class indiWindow(QMainWindow):
         self.rqidD[rqid] = TR_Name
 
     def pushButton_6_clicked(self): # 매수
+        print('매수시작')
         gaejwa_text = main_ui.textEdit_1.toPlainText()
         PW_text = main_ui.textEdit_2.toPlainText()
-        jongmokCode = main_ui.textEdit_3.toPlainText()
+        jongmokCode = 'A' + main_ui.textEdit_3.toPlainText()
         orderPrice = main_ui.textEdit_4.toPlainText()
         quantity = main_ui.spinBox.value()
-
         TR_Name = "SABA101U1"
+
+        print(gaejwa_text)
+        print(PW_text)
+        print(jongmokCode)
+        print(orderPrice)
+        print(quantity)
+        print(TR_Name)
         ret = giJongmokTRShow.SetQueryName(TR_Name)
         ret = giJongmokTRShow.SetSingleData(0, gaejwa_text)  # 계좌번호
         ret = giJongmokTRShow.SetSingleData(1, "01")  # 계좌상품
@@ -116,7 +128,7 @@ class indiWindow(QMainWindow):
         ret = giJongmokTRShow.SetSingleData(5, "0")  # 선물대용매도여부
         ret = giJongmokTRShow.SetSingleData(6, "00")  # 신용거래구분
         ret = giJongmokTRShow.SetSingleData(7, "2")  # 매도/매수 구분
-        ret = giJongmokTRShow.SetSingleData(8, "A" + jongmokCode)  # 종목코드
+        ret = giJongmokTRShow.SetSingleData(8, jongmokCode)  # 종목코드
         ret = giJongmokTRShow.SetSingleData(9, str(quantity))  # 주문 수량
         ret = giJongmokTRShow.SetSingleData(10, orderPrice)  # 주문 가격
         ret = giJongmokTRShow.SetSingleData(11, "1")  # 정규시간외구분코드
@@ -138,13 +150,19 @@ class indiWindow(QMainWindow):
         self.rqidD[rqid] = TR_Name
 
     def pushButton_7_clicked(self): # 매도
+        print('매도시작')
         gaejwa_text = main_ui.textEdit_1.toPlainText()
         PW_text = main_ui.textEdit_2.toPlainText()
-        jongmokCode = main_ui.textEdit_3.toPlainText()
+        jongmokCode = 'A' + main_ui.textEdit_3.toPlainText()
         orderPrice = main_ui.textEdit_4.toPlainText()
         quantity = main_ui.spinBox.value()
         TR_Name = "SABA101U1"
-
+        print(gaejwa_text)
+        print(PW_text)
+        print(jongmokCode)
+        print(orderPrice)
+        print(quantity)
+        print(TR_Name)
         ret = giJongmokTRShow.SetQueryName(TR_Name)
         ret = giJongmokTRShow.SetSingleData(0, gaejwa_text)  # 계좌번호
         ret = giJongmokTRShow.SetSingleData(1, "01")  # 계좌상품
@@ -154,7 +172,7 @@ class indiWindow(QMainWindow):
         ret = giJongmokTRShow.SetSingleData(5, "0")  # 선물대용매도여부
         ret = giJongmokTRShow.SetSingleData(6, "00")  # 신용거래구분
         ret = giJongmokTRShow.SetSingleData(7, "1")  # 매도/매수 구분
-        ret = giJongmokTRShow.SetSingleData(8, "A" + jongmokCode)  # 종목코드
+        ret = giJongmokTRShow.SetSingleData(8, jongmokCode)  # 종목코드
         ret = giJongmokTRShow.SetSingleData(9, str(quantity))  # 주문 수량
         ret = giJongmokTRShow.SetSingleData(10, orderPrice)  # 주문 가격
         ret = giJongmokTRShow.SetSingleData(11, "1")  # 정규시간외구분코드
@@ -176,6 +194,7 @@ class indiWindow(QMainWindow):
         self.rqidD[rqid] = TR_Name
 
     def pushButton_8_clicked(self): # 계좌 조회
+        print('계좌조회시작')
         gaejwa_text = main_ui.textEdit_1.toPlainText()
         PW_text = main_ui.textEdit_2.toPlainText()
         TR_Name = "SABA200QB"
@@ -207,12 +226,18 @@ class indiWindow(QMainWindow):
 
         if TR_Name == "SABA101U1": # 매수/매도
             print("매수매도 값")
-            print((str(giCtrl.GetSingleData(0))))
-            print((str(giCtrl.GetSingleData(1))))
-            print((str(giCtrl.GetSingleData(2))))
-            print((str(giCtrl.GetSingleData(3))))
-            print((str(giCtrl.GetSingleData(4))))
-            print((str(giCtrl.GetSingleData(5))))
+            nCnt = giCtrl.GetSingleRowCount()
+            print("c")
+            print(nCnt)
+            if nCnt != 0:
+                print((str(giCtrl.GetSingleData(0))))
+                print((str(giCtrl.GetSingleData(1))))
+                print((str(giCtrl.GetSingleData(2))))
+                print((str(giCtrl.GetSingleData(3))))
+                print((str(giCtrl.GetSingleData(4))))
+                print((str(giCtrl.GetSingleData(5))))
+            else:
+                print("주문이 정상적으로 처리되지 않았습니다.")
 
         if TR_Name == "SABA200QB": # 계좌 조회
             nCnt = giCtrl.GetMultiRowCount()
@@ -238,7 +263,7 @@ class indiWindow(QMainWindow):
                 riseRate = str(giCtrl.GetMultiData(i,6)) # 전일대비율
                 volume = str(giCtrl.GetMultiData(i,7)) # 누적거래량
                 volumePower = str(giCtrl.GetMultiData(i,13)) # 체결강도
-                print(jongmokCode)
+                # print(jongmokCode)
 
                 if jongmokCode in self.stock_dict:
                     found_stock = self.stock_dict.get(jongmokCode)
@@ -249,20 +274,18 @@ class indiWindow(QMainWindow):
                     main_ui.tableWidget_2.setItem(idx, 4, QTableWidgetItem(str(found_stock.volume)))
                     main_ui.tableWidget_2.setItem(idx, 5, QTableWidgetItem(str(found_stock.volumePower)))
                     idx += 1
-                    message = f"{name.strip()} 현재 {price} 등락 중 {riseRate}% 체결강도: {volumePower}"
+                    message = f"{name.strip()} 현재가 {price}원 {riseRate}% 등락 중 체결강도: {volumePower}"
                     print(message)
                     stock_messages.append(message)
             if stock_messages:
                 combined_message = "\n".join(stock_messages)
                 telegram.sendMessage(combined_message)
 
-
         if TR_Name == "TR_1505_03": # 신고가/ 신저가
             nCnt = giCtrl.GetMultiRowCount()
             main_ui.tableWidget_2.setRowCount(nCnt)
             
             for i in range(0, nCnt):
-
                 jongmokCode = str(giCtrl.GetMultiData(i,0)) # 단축코드
                 name = str(giCtrl.GetMultiData(i,1)) # 한글종목명
                 price = str(giCtrl.GetMultiData(i,2)) # 현재가
@@ -270,6 +293,7 @@ class indiWindow(QMainWindow):
                 volume = str(giCtrl.GetMultiData(i,8)) # 누적거래량
                 volumePower = str(giCtrl.GetMultiData(i,13)) # 체결강도
                 self.stock_dict[jongmokCode] = Stock(jongmokCode, name, price, riseRate, volume, volumePower) # map에 추가
+            # time.sleep(10)
 
 
     def giJongmokRealTime_ReceiveRTData(self, giCtrl, RealType):
@@ -290,15 +314,6 @@ class Stock:
         self.riseRate = riseRate
         self.volume = volume
         self.volumePower = volumePower
-
-    def create_stock_message(self):
-        name = self.name
-        price = self.price
-        riseRate = self.riseRate
-        volumePower = self.volumePower
-
-        message = f"{name} 현재 {price:.2f}등락 중 {riseRate}% 체결강도: {volumePower}"
-        return message
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

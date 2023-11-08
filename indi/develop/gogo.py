@@ -9,6 +9,7 @@ import GiExpertControl as giJongmokRealTime
 from finalUI import Ui_MainWindow
 from datetime import datetime
 from telegram import Telegram
+from functools import partial
 import time
 
 main_ui = Ui_MainWindow()
@@ -34,7 +35,7 @@ class indiWindow(QMainWindow):
         main_ui.pushButton_3.clicked.connect(self.pushButton_3_clicked) # 검색기 시작 TR_1505_03(신고가)+ TR_1864 (거래량급등락)
         main_ui.pushButton_4.clicked.connect(self.pushButton_4_clicked) # 검색기 종료
 
-        main_ui.pushButton_5.clicked.connect(self.pushButton_5_clicked) # 뉴스 불러오기
+        # main_ui.pushButton_5.clicked.connect(self.pushButton_5_clicked) # 뉴스 불러오기
 
         main_ui.pushButton_6.clicked.connect(self.pushButton_6_clicked) # 매수
         main_ui.pushButton_7.clicked.connect(self.pushButton_7_clicked) # 매도
@@ -93,14 +94,14 @@ class indiWindow(QMainWindow):
         self.searchFlag = False
         print('검색기종료')
 
-    def pushButton_5_clicked(self): # 뉴스 불러오기
+    def pushButton_5_clicked(self, jongmokCode): # 뉴스 불러오기
         TR_Name = "TR_3100_D"   
         print('뉴스시작')
         ret = giJongmokTRShow.SetQueryName(TR_Name)
         # 현재 날짜를 가져오기
         today = datetime.now()
         formatted_date = today.strftime("%Y%m%d")
-        ret = giJongmokTRShow.SetSingleData(0,"055550")
+        ret = giJongmokTRShow.SetSingleData(0,jongmokCode)
         ret = giJongmokTRShow.SetSingleData(1,"1")
         ret = giJongmokTRShow.SetSingleData(2, formatted_date)
         rqid = giJongmokTRShow.RequestData() # 요청
@@ -250,16 +251,30 @@ class indiWindow(QMainWindow):
                 main_ui.tableWidget_4.setItem(i,2,QTableWidgetItem(str(giCtrl.GetMultiData(i, 2)).lstrip('0'))) # 결제일잔고수량
                 main_ui.tableWidget_4.setItem(i,3,QTableWidgetItem(str(giCtrl.GetMultiData(i, 5)).lstrip('0'))) # 현재가
                 main_ui.tableWidget_4.setItem(i,4,QTableWidgetItem(str(giCtrl.GetMultiData(i, 6)).lstrip('0'))) # 평균단가
-                main_ui.tableWidget_4.setItem(i,5,QTableWidgetItem(str(giCtrl.GetMultiData(i, 3)).lstrip('0'))) # 매수미체결수량
-                main_ui.tableWidget_4.setItem(i,6,QTableWidgetItem(str(giCtrl.GetMultiData(i, 4)).lstrip('0'))) # 매도미체결수량
+                main_ui.tableWidget_4.setItem(i,5,QTableWidgetItem(str(giCtrl.GetMultiData(i, 4)).lstrip('0'))) # 매수미체결수량
+                main_ui.tableWidget_4.setItem(i,6,QTableWidgetItem(str(giCtrl.GetMultiData(i, 3)).lstrip('0'))) # 매도미체결수량
 
         if TR_Name == "TR_1864": # 거래량 급등락 종목 조회
             nCnt = giCtrl.GetMultiRowCount()
-            print("거래량 급등종목")
+            print("거래량 급등종목 수:")
             print(nCnt)
             idx = 0
             main_ui.tableWidget_2.setRowCount(nCnt)
             stock_messages = []
+            ##########################################333
+            # main_ui.tableWidget_2.setRowCount(1)
+            # main_ui.tableWidget_2.setItem(0, 0, QTableWidgetItem('str(jongmokCode)'))
+            # main_ui.tableWidget_2.setItem(0, 1, QTableWidgetItem('str(found_stock.name)'))
+            # main_ui.tableWidget_2.setItem(0, 2, QTableWidgetItem('str(found_stock.price)'))
+            # main_ui.tableWidget_2.setItem(0, 3, QTableWidgetItem('str(found_stock.riseRate)'))
+            # main_ui.tableWidget_2.setItem(0, 4, QTableWidgetItem('str(found_stock.volume)'))
+            # main_ui.tableWidget_2.setItem(0, 5, QTableWidgetItem('str(found_stock.volumePower)'))
+            # button = QPushButton("뉴스보기")
+            # main_ui.tableWidget_2.setCellWidget(0,6,button)
+            # button.clicked.connect(partial(self.pushButton_5_clicked, '005960'))
+            ###########################################
+
+
             if len(self.stock_dict) == 0:
                 self.pushButton_3_clicked()
             for i in range(0, nCnt):
@@ -269,7 +284,7 @@ class indiWindow(QMainWindow):
                 riseRate = str(giCtrl.GetMultiData(i,6)) # 전일대비율
                 volume = str(giCtrl.GetMultiData(i,7)) # 누적거래량
                 volumePower = str(giCtrl.GetMultiData(i,13)) # 체결강도
-                # print(jongmokCode)
+                print(jongmokCode)
 
                 if jongmokCode in self.stock_dict:
                     found_stock = self.stock_dict.get(jongmokCode)
@@ -279,6 +294,10 @@ class indiWindow(QMainWindow):
                     main_ui.tableWidget_2.setItem(idx, 3, QTableWidgetItem(str(found_stock.riseRate)))
                     main_ui.tableWidget_2.setItem(idx, 4, QTableWidgetItem(str(found_stock.volume)))
                     main_ui.tableWidget_2.setItem(idx, 5, QTableWidgetItem(str(found_stock.volumePower)))
+                    button = QPushButton("뉴스보기")
+                    main_ui.tableWidget_2.setCellWidget(idx,6,button)
+                    button.clicked.connect(partial(self.pushButton_5_clicked, jongmokCode))
+                    # button.clicked.connect(self.btn_fun)
                     idx += 1
                     message = f"{name.strip()} 현재가 {price}원 {riseRate}% 등락 중 체결강도: {volumePower}"
                     print(message)
@@ -290,34 +309,44 @@ class indiWindow(QMainWindow):
         if TR_Name == "TR_1505_03": # 신고가/ 신저가
             nCnt = giCtrl.GetMultiRowCount()
             main_ui.tableWidget_2.setRowCount(nCnt)
-            
+            print("신고가 종목수:")
+            print(nCnt)
             for i in range(0, nCnt):
                 jongmokCode = str(giCtrl.GetMultiData(i,0)) # 단축코드
+                print(jongmokCode)
                 name = str(giCtrl.GetMultiData(i,1)) # 한글종목명
                 price = str(giCtrl.GetMultiData(i,2)) # 현재가
                 riseRate = str(giCtrl.GetMultiData(i,5)) # 전일대비율
                 volume = str(giCtrl.GetMultiData(i,8)) # 누적거래량
                 volumePower = str(giCtrl.GetMultiData(i,13)) # 체결강도
                 self.stock_dict[jongmokCode] = Stock(jongmokCode, name, price, riseRate, volume, volumePower) # map에 추가
-            # time.sleep(10)
 
 
     def giJongmokRealTime_ReceiveRTData(self, giCtrl, RealType):
         if RealType == "IC":
+            print(str(giCtrl.GetSingleData(0)).strip())
             if main_ui.tableWidget_1.rowCount() == 0:
-                main_ui.tableWidget_1.insertRow(main_ui.tableWidget_1.rowCount() + 1)
-            if str(giCtrl.GetSingleData(0)) == '0001': # 코스피지수
-                main_ui.tableWidget_1.setItem(0, 0, QTableWidgetItem(str(giCtrl.GetSingleData(0))))  # 업종코드
+                main_ui.tableWidget_1.setRowCount(2)
+            if str(giCtrl.GetSingleData(0)).strip() == '0001': # 코스피지수
+                main_ui.tableWidget_1.setItem(0, 0, QTableWidgetItem('코스피'))  # 업종코드
                 main_ui.tableWidget_1.setItem(0, 1, QTableWidgetItem(str(giCtrl.GetSingleData(2))))  # 장구분
                 main_ui.tableWidget_1.setItem(0, 2, QTableWidgetItem(str(giCtrl.GetSingleData(3))))  # 현재지수
                 main_ui.tableWidget_1.setItem(0, 3, QTableWidgetItem(str(giCtrl.GetSingleData(6))))  # 전일대비율
                 main_ui.tableWidget_1.setItem(0, 4, QTableWidgetItem(str(giCtrl.GetSingleData(8))))  # 누적거래대금
-            if str(giCtrl.GetSingleData(0)) == '1001': # 코스닥지수
-                main_ui.tableWidget_1.setItem(1, 0, QTableWidgetItem(str(giCtrl.GetSingleData(0))))  # 업종코드
+            if str(giCtrl.GetSingleData(0)).strip() == '1001': # 코스닥지수
+                main_ui.tableWidget_1.setItem(1, 0, QTableWidgetItem('코스닥'))  # 업종코드
                 main_ui.tableWidget_1.setItem(1, 1, QTableWidgetItem(str(giCtrl.GetSingleData(2))))  # 장구분
                 main_ui.tableWidget_1.setItem(1, 2, QTableWidgetItem(str(giCtrl.GetSingleData(3))))  # 현재지수
                 main_ui.tableWidget_1.setItem(1, 3, QTableWidgetItem(str(giCtrl.GetSingleData(6))))  # 전일대비율
                 main_ui.tableWidget_1.setItem(1, 4, QTableWidgetItem(str(giCtrl.GetSingleData(8))))  # 누적거래대금
+
+    def btn_fun(self, jongmokCode):
+        button = self.sender()
+
+        item = self.ta1.indexAt(button.pos())
+
+          
+        print( self.ta1.item( item.row(),0 ).text()  )
 class Stock:
     def __init__(self, jongmokCode, name, price, riseRate, volume, volumePower):
         self.jongmokCode = jongmokCode

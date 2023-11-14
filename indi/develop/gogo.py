@@ -329,13 +329,15 @@ class indiWindow(QMainWindow):
                 main_ui.tableWidget_1.setRowCount(2)
             if str(giCtrl.GetSingleData(0)).strip() == '0001': # 코스피지수
                 main_ui.tableWidget_1.setItem(0, 0, QTableWidgetItem('코스피'))  # 업종코드
-                main_ui.tableWidget_1.setItem(0, 1, QTableWidgetItem(str(giCtrl.GetSingleData(2))))  # 장구분
+                market_status = '정규장' if str(giCtrl.GetSingleData(2)).strip() == '1' else '정규장종료'
+                main_ui.tableWidget_1.setItem(0, 1, QTableWidgetItem(market_status))  # 장구분
                 main_ui.tableWidget_1.setItem(0, 2, QTableWidgetItem(str(giCtrl.GetSingleData(3))))  # 현재지수
                 main_ui.tableWidget_1.setItem(0, 3, QTableWidgetItem(str(giCtrl.GetSingleData(6))))  # 전일대비율
                 main_ui.tableWidget_1.setItem(0, 4, QTableWidgetItem(str(giCtrl.GetSingleData(8))))  # 누적거래대금
             if str(giCtrl.GetSingleData(0)).strip() == '1001': # 코스닥지수
                 main_ui.tableWidget_1.setItem(1, 0, QTableWidgetItem('코스닥'))  # 업종코드
-                main_ui.tableWidget_1.setItem(1, 1, QTableWidgetItem(str(giCtrl.GetSingleData(2))))  # 장구분
+                market_status = '정규장' if str(giCtrl.GetSingleData(2)).strip() == '1' else '정규장종료'
+                main_ui.tableWidget_1.setItem(1, 1, QTableWidgetItem(market_status))  # 장구분
                 main_ui.tableWidget_1.setItem(1, 2, QTableWidgetItem(str(giCtrl.GetSingleData(3))))  # 현재지수
                 main_ui.tableWidget_1.setItem(1, 3, QTableWidgetItem(str(giCtrl.GetSingleData(6))))  # 전일대비율
                 main_ui.tableWidget_1.setItem(1, 4, QTableWidgetItem(str(giCtrl.GetSingleData(8))))  # 누적거래대금

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1066</width>
-    <height>619</height>
+    <height>667</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -169,7 +169,7 @@ p, li { white-space: pre-wrap; }
       <x>30</x>
       <y>140</y>
       <width>501</width>
-      <height>411</height>
+      <height>461</height>
      </rect>
     </property>
    </widget>
@@ -179,7 +179,7 @@ p, li { white-space: pre-wrap; }
       <x>610</x>
       <y>90</y>
       <width>401</width>
-      <height>461</height>
+      <height>201</height>
      </rect>
     </property>
    </widget>
@@ -224,6 +224,12 @@ p, li { white-space: pre-wrap; }
     <property name="text">
      <string>CheckBox</string>
     </property>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
    </widget>
    <widget class="QLabel" name="pbr">
     <property name="geometry">
@@ -238,7 +244,7 @@ p, li { white-space: pre-wrap; }
      <string>PBR</string>
     </property>
    </widget>
-   <widget class="QCheckBox" name="pcrCheck">
+   <widget class="QCheckBox" name="psrCheck">
     <property name="geometry">
      <rect>
       <x>710</x>
@@ -251,7 +257,7 @@ p, li { white-space: pre-wrap; }
      <string>CheckBox</string>
     </property>
    </widget>
-   <widget class="QLabel" name="pcr">
+   <widget class="QLabel" name="psr">
     <property name="geometry">
      <rect>
       <x>730</x>
@@ -261,7 +267,7 @@ p, li { white-space: pre-wrap; }
      </rect>
     </property>
     <property name="text">
-     <string>PCR</string>
+     <string>PSR</string>
     </property>
    </widget>
    <widget class="QGroupBox" name="accountGroup">
@@ -270,27 +276,177 @@ p, li { white-space: pre-wrap; }
       <x>10</x>
       <y>10</y>
       <width>551</width>
-      <height>561</height>
+      <height>611</height>
      </rect>
     </property>
     <property name="title">
      <string>잔고 및 주문</string>
     </property>
    </widget>
-   <widget class="QGroupBox" name="itemGroup">
+   <widget class="QGroupBox" name="itemGrouKO">
     <property name="geometry">
      <rect>
       <x>580</x>
       <y>10</y>
       <width>461</width>
-      <height>561</height>
+      <height>301</height>
      </rect>
     </property>
     <property name="title">
-     <string>종목 추천</string>
+     <string>국내 종목 추천</string>
     </property>
    </widget>
-   <zorder>itemGroup</zorder>
+   <widget class="QLabel" name="per_us">
+    <property name="geometry">
+     <rect>
+      <x>630</x>
+      <y>360</y>
+      <width>56</width>
+      <height>12</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PER</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="pbr_us">
+    <property name="geometry">
+     <rect>
+      <x>680</x>
+      <y>360</y>
+      <width>56</width>
+      <height>12</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PBR</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="psr_us">
+    <property name="geometry">
+     <rect>
+      <x>730</x>
+      <y>360</y>
+      <width>56</width>
+      <height>12</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PSR</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="pbrCheckUS">
+    <property name="geometry">
+     <rect>
+      <x>660</x>
+      <y>360</y>
+      <width>16</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>CheckBox</string>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QTableWidget" name="itemTableUS">
+    <property name="geometry">
+     <rect>
+      <x>610</x>
+      <y>400</y>
+      <width>401</width>
+      <height>201</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="psrCheckUS">
+    <property name="geometry">
+     <rect>
+      <x>710</x>
+      <y>360</y>
+      <width>16</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>CheckBox</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="perCheckUS">
+    <property name="geometry">
+     <rect>
+      <x>610</x>
+      <y>360</y>
+      <width>16</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>CheckBox</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="itemGroupUS">
+    <property name="geometry">
+     <rect>
+      <x>580</x>
+      <y>320</y>
+      <width>461</width>
+      <height>301</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>해외 종목 추천</string>
+    </property>
+    <widget class="QPushButton" name="recommendBtnUS">
+     <property name="geometry">
+      <rect>
+       <x>320</x>
+       <y>30</y>
+       <width>111</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>종목 선별</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="pcrCheckUS">
+     <property name="geometry">
+      <rect>
+       <x>180</x>
+       <y>40</y>
+       <width>16</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>CheckBox</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="pcr_us">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>40</y>
+       <width>56</width>
+       <height>12</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>PCR</string>
+     </property>
+    </widget>
+   </widget>
+   <zorder>itemGroupUS</zorder>
+   <zorder>itemGrouKO</zorder>
    <zorder>accountGroup</zorder>
    <zorder>account</zorder>
    <zorder>password</zorder>
@@ -308,8 +464,15 @@ p, li { white-space: pre-wrap; }
    <zorder>per</zorder>
    <zorder>pbrCheck</zorder>
    <zorder>pbr</zorder>
-   <zorder>pcrCheck</zorder>
-   <zorder>pcr</zorder>
+   <zorder>psrCheck</zorder>
+   <zorder>psr</zorder>
+   <zorder>per_us</zorder>
+   <zorder>pbr_us</zorder>
+   <zorder>psr_us</zorder>
+   <zorder>pbrCheckUS</zorder>
+   <zorder>itemTableUS</zorder>
+   <zorder>psrCheckUS</zorder>
+   <zorder>perCheckUS</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

@@ -17,6 +17,10 @@ main_ui = Ui_MainWindow()
 #telegram = Telegram()
 
 class indiWindow(QMainWindow):
+
+    includePsr = None
+    exceptPsr = None
+
     # UI 선언
     def __init__(self):
         super().__init__()
@@ -38,6 +42,9 @@ class indiWindow(QMainWindow):
         #main_ui.pushButton_4.clicked.connect(self.pushButton_4_clicked) # 검색기 종료
 
         main_ui.recommendBtn.clicked.connect(self.recommendBtnClicked) # 종목 선별
+        main_ui.recommendBtnUS.clicked.connect(self.recommendBtnUSClicked) # 종목 선별
+        main_ui.buyAllBtn.clicked.connect(self.buyAllBtnClicked) # 일괄 매수
+
 
         main_ui.buyBtn.clicked.connect(self.buyBtnClicked) # 매수
         main_ui.sellBtn.clicked.connect(self.sellBtnClicked) # 매도
@@ -46,6 +53,7 @@ class indiWindow(QMainWindow):
 
         giJongmokTRShow.SetCallBack('ReceiveData', self.giJongmokTRShow_ReceiveData)
         #giJongmokRealTime.SetCallBack('ReceiveRTData', self.giJongmokRealTime_ReceiveRTData)
+
 
 
     def buyBtnClicked(self): # 매수
@@ -93,6 +101,10 @@ class indiWindow(QMainWindow):
         print('Request Data rqid: ' + str(rqid))
         self.rqidD[rqid] = TR_Name
 
+    def buyAllBtnClicked(self):
+        print(self.includePsr)
+        print(self.exceptPsr)    
+
     def sellBtnClicked(self): # 매도
         print('매도시작')
         account = main_ui.account.toPlainText()
@@ -138,10 +150,6 @@ class indiWindow(QMainWindow):
         self.rqidD[rqid] = TR_Name
 
     def recommendBtnClicked(self):
-
-        # psr 체크 여부 확인
-        psr_checked = main_ui.psrCheck.isChecked()
-
         TR_Name = "TR_1856_IND"
         ret = giJongmokTRShow.SetQueryName(TR_Name)
         ret = giJongmokTRShow.SetSingleData(0,"1")
@@ -153,11 +161,89 @@ class indiWindow(QMainWindow):
         print('Request Data rqid: ' + str(rqid))
         self.rqidD[rqid] = TR_Name
 
-        if psr_checked:
-            print("PER, PBR, PSR을 기준으로 종목 선별 중 ... ")
-        else:
-            print("PER, PBR을 기준으로 종목 선별 중 ... ")
+    def recommendBtnUSClicked(self):
 
+        terms=fs.set_terms(trade_start='2023Q3',trade_end='2023Q3')
+        data={}
+        for t in terms:
+            data[t]=fs.fn_consolidated(otp='17000306151191101151',term=t)
+  
+        #PER PBR PSR PCR을 구함
+        for t in terms:
+            data[t]['Market Cap']=data[t]['Price_M3']*data[t]['Shares']
+            data[t]['PER']=data[t]['Price_M3']/data[t]['EPS']
+            data[t]['PBR']=data[t]['Price_M3']/(data[t]['Shareholders Equity']/data[t]['Shares'])
+            data[t]['PSR']=data[t]['Price_M3']/(data[t]['Revenue']/data[t]['Shares'])
+            data[t]['PCR']=data[t]['Price_M3']/((data[t]['Net Income']+data[t]['Depreciation'])/data[t]['Shares'])
+        
+        market={}
+        per={}
+        pbr={}
+        psr={}
+        pcr={}
+        result = {}
+
+        #20%시가총액 뽑을 수가 없어서 5000개 종목 중 1000개로 선정
+        for t in terms:
+            market[t]=fs.fn_filter(data[t],by='Market Cap', floor=0, n=1000, asc=True)
+            per[t]=fs.fn_score(data[t], by='PER', method='relative', floor=1, asc=True)
+            pbr[t]=fs.fn_score(data[t], by='PBR', method='relative', floor=0.1, asc=True)
+            psr[t]=fs.fn_score(data[t], by='PSR', method='relative', floor=0.1, asc=True)
+            pcr[t]=fs.fn_score(data[t], by='PCR', method='relative', floor=0.1, asc=True)
+        
+        psr_checked = main_ui.psrCheckUS.isChecked()
+        pcr_checked = main_ui.pcrCheckUS.isChecked()
+        
+        if not psr_checked and not pcr_checked:
+            print("PER, PBR로 종목 선별 중 ...")
+            for t in terms:
+                combined_score = fs.combine_score(per[t], pbr[t])
+                combined_score.rename(columns={'Score': 'per_score', 'Score_': 'pbr_score'}, inplace=True)
+                # 스코어를 기준으로 내림차순 정렬하고 상위 30개를 선택
+                result[t] = combined_score.sort_values(by='Sum', ascending=False).head(30)
+            print(result['2023Q2'])
+
+        elif psr_checked and not pcr_checked:
+            print("PER, PBR, PSR로 종목 선별 중 ...")
+            for t in terms:
+                combined_score = fs.combine_score(per[t], pbr[t], psr[t])
+                combined_score.columns = ['per_score', 'pbr_score', 'psr_score', 'Sum']
+                # 스코어를 기준으로 내림차순 정렬하고 상위 30개를 선택
+                result[t] = combined_score.sort_values(by='Sum', ascending=False).head(30)
+            print(result['2023Q2'])
+        
+        elif not psr_checked and pcr_checked:
+            print("PER, PBR, PCR로 종목 선별 중 ...")
+            for t in terms:
+                combined_score = fs.combine_score(per[t], pbr[t], pcr[t])
+                combined_score.columns = ['per_score', 'pbr_score', 'pcr_score', 'Sum']
+                # 스코어를 기준으로 내림차순 정렬하고 상위 30개를 선택
+                result[t] = combined_score.sort_values(by='Sum', ascending=False).head(30)
+            print(result['2023Q2'])
+            
+        elif psr_checked and pcr_checked:
+            print("PER, PBR, PSR, PCR로 종목 선별 중 ...")
+            for t in terms:
+                combined_score = fs.combine_score(per[t], pbr[t], psr[t], pcr[t])
+                combined_score.columns = ['per_score', 'pbr_score', 'psr_score', 'pcr_score', 'Sum']
+                # 스코어를 기준으로 내림차순 정렬하고 상위 30개를 선택
+                result[t] = combined_score.sort_values(by='Sum', ascending=False).head(30)
+            print(result['2023Q2'])
+            
+
+        """
+        main_ui.itemTable.clearContents()
+        main_ui.itemTable.setRowCount(30)
+
+        for i in range(0, 30):
+            main_ui.itemTable.setItem(i, 0, QTableWidgetItem(str(includePsr.iloc[i]['itemNm'])))
+            main_ui.itemTable.setItem(i, 1, QTableWidgetItem(str(includePsr.iloc[i]['itemCd'])))
+            main_ui.itemTable.setItem(i, 2, QTableWidgetItem(str(includePsr.iloc[i]['price'])))
+            main_ui.itemTable.setItem(i, 3, QTableWidgetItem(str(includePsr.iloc[i]['Total_Score'])))
+            main_ui.itemTable.setItem(i, 4, QTableWidgetItem(str(includePsr.iloc[i]['PER_Score'])))
+            main_ui.itemTable.setItem(i, 5, QTableWidgetItem(str(includePsr.iloc[i]['PBR_Score'])))
+            main_ui.itemTable.setItem(i, 6, QTableWidgetItem(str(includePsr.iloc[i]['PSR_Score'])))
+        """
     def balanceBtnClicked(self): # 계좌 조회
         print('계좌 조회 시작')
         account = main_ui.account.toPlainText()
@@ -173,7 +259,7 @@ class indiWindow(QMainWindow):
         print(giJongmokTRShow.GetErrorMessage())
         print(type(rqid))
         print('Request Data rqid: ' + str(rqid))
-        self.rqidD[rqid] = TR_Name
+        self.rqidD[rqid] = TR_Name 
 
     def giJongmokTRShow_ReceiveData(self, giCtrl, rqid):
         print("in receive_Data:", rqid)
@@ -210,12 +296,16 @@ class indiWindow(QMainWindow):
                 main_ui.accountTable.setItem(i,6,QTableWidgetItem(str(giCtrl.GetMultiData(i, 3)).lstrip('0'))) # 매도미체결수량
 
 
-        if TR_Name == "TR_1856_IND":  # TR_1856_IND 호출 시
+        if TR_Name == "TR_1856_IND":
+
+            psr_checked = main_ui.psrCheck.isChecked()
+
             nCnt = giCtrl.GetMultiRowCount()
-            data = {'itemNm': [], 'itemCd': [], 'price': [], 'PER': [], 'market': [], 'revenue': [], 'PBR': []}
+
+            data = []
 
             for i in range(nCnt):
-                # 각 데이터를 문자열로 가져오고 앞의 '0'을 제거하여 저장
+                # 각 데이터를 가져오고 문자열로 변환
                 itemNm = str(giCtrl.GetMultiData(i, 1))
                 itemCd = str(giCtrl.GetMultiData(i, 0))
                 price = str(giCtrl.GetMultiData(i, 2))
@@ -224,66 +314,86 @@ class indiWindow(QMainWindow):
                 revenue = str(giCtrl.GetMultiData(i, 27))
                 PBR = str(giCtrl.GetMultiData(i, 36))
 
-                # 데이터를 딕셔너리에 추가
-                data['itemNm'].append(itemNm)
-                data['itemCd'].append(itemCd)
-                data['price'].append(price)
-                data['PER'].append(PER)
-                data['market'].append(market)
-                data['revenue'].append(revenue)
-                data['PBR'].append(PBR)
+                # 데이터를 리스트에 추가
+                data.append([itemNm, itemCd, price, PER, market, revenue, PBR])
 
-                # 시가총액 하위순 정렬
-                sorted_data = sorted(zip(data['itemNm'], data['itemCd'], data['price'], data['PER'], data['market'], data['revenue'], data['PBR']),
-                                    key=lambda x: x[4], reverse=True)
+            # 데이터프레임으로 변환
+            df = pd.DataFrame(data, columns=['itemNm', 'itemCd', 'price', 'PER', 'market', 'revenue', 'PBR'])
 
-                # 시가총액 하위 20%만 선택
-                top_20_percent = int(0.2 * len(sorted_data))
-                selected_data = sorted_data[:top_20_percent]
+            # 시가총액을 기준으로 정렬
+            df['market'] = pd.to_numeric(df['market'])
+            df = df.sort_values(by='market', ascending=True)
 
-                # 선택된 데이터를 다시 딕셔너리로 변환
-                selected_data_dict = {'itemNm': [], 'itemCd': [], 'price': [], 'PER': [], 'market': [], 'revenue': [], 'PBR': []}
-                for item in selected_data:
-                    selected_data_dict['itemNm'].append(item[0])
-                    selected_data_dict['itemCd'].append(item[1])
-                    selected_data_dict['price'].append(item[2])
-                    selected_data_dict['PER'].append(pd.to_numeric(item[3]))
-                    selected_data_dict['market'].append(item[4])
-                    selected_data_dict['revenue'].append(item[5])
-                    selected_data_dict['PBR'].append(pd.to_numeric(item[6]))
+            # 시가총액 하위 30% 선별
+            top_20_percent = int(0.3 * len(df))
+            df = df.head(top_20_percent)
 
-            df = pd.DataFrame(selected_data_dict)
+            # 연산 할 숫자들 타입 변경하기
+            df[['PER', 'PBR', 'market', 'revenue']] = df[['PER', 'PBR', 'market', 'revenue']].apply(pd.to_numeric)
+            df['PSR'] = df['market'] / df['revenue'] * 1000
 
-            # PER 및 PBR에 대한 상대적인 점수를 계산하고 'Score'라는 새로운 열을 생성합니다.
-            max_score = 50
-            df['PER_Score'] = (df['PER'].rank(ascending=True) / len(df)) * max_score
-            df['PBR_Score'] = (df['PBR'].rank(ascending=True) / len(df)) * max_score
+            if psr_checked:
+                print("PER, PBR, PSR을 기준으로 종목 선별 중 ... ")
+                # PER, PBR, PCR에 대한 상대 점수 계산
+                max_score = 33.33
+                df['PER_Score'] = (df['PER'].rank(ascending=True) / len(df)) * max_score
+                df['PBR_Score'] = (df['PBR'].rank(ascending=True) / len(df)) * max_score
+                df['PSR_Score'] = (df['PBR'].rank(ascending=True) / len(df)) * max_score
 
-            # 점수를 합산하고 'Total_Score'라는 새로운 열을 생성합니다.
-            df['Total_Score'] = df['PER_Score'] + df['PBR_Score']
+                # PER PBR 점수 합산
+                df['Total_Score'] = df['PER_Score'] + df['PBR_Score'] + df['PSR_Score']
 
-            # 'Total_Score'를 기준으로 데이터프레임을 내림차순으로 정렬합니다.
-            df = df.sort_values(by='Total_Score', ascending=False)
+                # score 기준 정렬
+                df = df.sort_values(by='Total_Score', ascending=False)
+                
+                # 상위 30개 아이템 선택
+                self.includePsr = df.head(30)
+                
+                main_ui.itemTable.clearContents()
+                main_ui.itemTable.setRowCount(30)
 
-            # 상위 30개 아이템을 선택합니다.
-            top_30_items = df.head(30)
+                for i in range(0, 30):
+                    main_ui.itemTable.setItem(i, 0, QTableWidgetItem(str(self.includePsr.iloc[i]['itemNm'])))
+                    main_ui.itemTable.setItem(i, 1, QTableWidgetItem(str(self.includePsr.iloc[i]['itemCd'])))
+                    main_ui.itemTable.setItem(i, 2, QTableWidgetItem(str(self.includePsr.iloc[i]['price'])))
+                    main_ui.itemTable.setItem(i, 3, QTableWidgetItem(str(self.includePsr.iloc[i]['Total_Score'])))
+                    main_ui.itemTable.setItem(i, 4, QTableWidgetItem(str(self.includePsr.iloc[i]['PER_Score'])))
+                    main_ui.itemTable.setItem(i, 5, QTableWidgetItem(str(self.includePsr.iloc[i]['PBR_Score'])))
+                    main_ui.itemTable.setItem(i, 6, QTableWidgetItem(str(self.includePsr.iloc[i]['PSR_Score'])))
+
+            else:
+                print("PER, PBR을 기준으로 종목 선별 중 ... ")
+
+                # PER, PBR에 대한 상대 점수 계산
+                max_score = 50
+                df['PER_Score'] = (df['PER'].rank(ascending=True) / len(df)) * max_score
+                df['PBR_Score'] = (df['PBR'].rank(ascending=True) / len(df)) * max_score
+
+                # PER PBR 점수 합산
+                df['Total_Score'] = df['PER_Score'] + df['PBR_Score']
+
+                # score 기준 정렬
+                df = df.sort_values(by='Total_Score', ascending=False)
+                
+                # 상위 30개 아이템 선택
+                self.exceptPsr = df.head(30)
+                
+                main_ui.itemTable.clearContents()
+                main_ui.itemTable.setRowCount(30)
+                for i in range(0, 30):
+                    main_ui.itemTable.setItem(i, 0, QTableWidgetItem(str(self.exceptPsr.iloc[i]['itemNm'])))
+                    main_ui.itemTable.setItem(i, 1, QTableWidgetItem(str(self.exceptPsr.iloc[i]['itemCd'])))
+                    main_ui.itemTable.setItem(i, 2, QTableWidgetItem(str(self.exceptPsr.iloc[i]['price'])))
+                    main_ui.itemTable.setItem(i, 3, QTableWidgetItem(str(self.exceptPsr.iloc[i]['Total_Score'])))
+                    main_ui.itemTable.setItem(i, 4, QTableWidgetItem(str(self.exceptPsr.iloc[i]['PER_Score'])))
+                    main_ui.itemTable.setItem(i, 5, QTableWidgetItem(str(self.exceptPsr.iloc[i]['PBR_Score'])))
+                    main_ui.itemTable.setItem(i, 6, QTableWidgetItem(str("NAN")))
+
+
             
-            #df['term'] = df['term'] 
-            #s2 = {}
-            #s3 = {}
-            #s4 = {}
-            #s2 = fs.fn_score(df, by='PER', method='relative', floor=1, asc=True)
-            #s3 = fs.fn_score(df, by='PBR', method='relative', floor=0.1, asc=True)
             
-            #combined_score = fs.combine_score(s2, s3)
-            #s4 = combined_score.sort_values(by='Sum', ascending=False).head(30)
 
-            if(self.count == 0):
-                # data 딕셔너리 출력
-                #print(s4)
-                print("--------------")
-                print(top_30_items)
-                self.count = self.count + 1
+            
 
             
 

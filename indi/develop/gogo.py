@@ -320,6 +320,9 @@ class indiWindow(QMainWindow):
                 volume = str(giCtrl.GetMultiData(i,8)) # 누적거래량
                 volumePower = str(giCtrl.GetMultiData(i,13)) # 체결강도
                 self.stock_dict[jongmokCode] = Stock(jongmokCode, name, price, riseRate, volume, volumePower) # map에 추가
+            print("-------------------------")
+            print(self.stock_dict.get[jongmokCode])
+            print("-------------------------")
 
 
     def giJongmokRealTime_ReceiveRTData(self, giCtrl, RealType):
